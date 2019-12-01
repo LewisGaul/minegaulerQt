@@ -1,47 +1,4 @@
 
-import sys
-from os.path import join, dirname, abspath
-
-
-__version__ = '2.1.1'
-IN_EXE = hasattr(sys, 'frozen')
-src_direc = dirname(abspath(__file__))
-if IN_EXE:
-    base_direc = src_direc
-else:
-    base_direc = dirname(src_direc)
-img_direc = join(base_direc, 'images')
-file_direc = join(base_direc, 'files')
-
-diff_values = {
-    'b': ( 8,  8,  10),
-    'i': (16, 16,  40),
-    'e': (30, 16,  99),
-    'm': (30, 30, 200),
-    'c': None
-}
-default_settings = {
-    'x_size': 8,
-    'y_size': 8,
-    'nr_mines': 10,
-    'diff': 'b',
-    'first_success': True,
-    'per_cell': 1,
-    # 'radius': 1,    # Implement later
-    'drag_select': False,
-    'btn_size': 16, #pixels
-    'name': '',
-    'styles': {
-        'buttons': 'Standard',
-        'numbers': 'Standard',
-        'markers': 'Standard'
-        },
-    'hscore_sort': 'time',
-    'hscore_filters': {
-        'name': '',
-        'flagging': '',
-    }
-}
 
 def prettify_grid(grid, repr_map=dict(), cell_size=1):
     ret = ''
@@ -66,3 +23,12 @@ def get_nbrs(x, y, x_size, y_size):
 def calc_3bvps(h):
     # Round up to 2 d.p. (converting time to seconds)
     return (1e5 * h['3bv'] // h['time']) / 100 + 0.01
+
+def blend_colours(ratio, high=(255, 0, 0), low=(255, 255, 64), fmt='rgb'):
+    colour = tuple(int(low[i] + ratio*(high[i] - low[i])) for i in range(3))
+    if fmt.lower() == 'rgb':
+        return colour
+    elif fmt == 'hex':
+        return '#%02x%02x%02x' % colour
+    else:
+        raise ValueError(f"Invalid format '{fmt}'")

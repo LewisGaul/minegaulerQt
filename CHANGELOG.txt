@@ -1,16 +1,18 @@
 Coming soon:
 - Styles
-- Probability calculations
 - Custom boards
 - Info about current game
 - Hide timer
+- Pause
 - Change displayed highscores group (settings beside the highscore table)
 - Help windows
-- Pause
 - Lives
 - Zoom
 - Radius of detection option
 - Create, save and load boards
+
+Known bugs/issues:
+- Probability calculation slow-downs, reset times
 
 Future plans:
 - Track clicks to allow for creating video of played game
@@ -26,7 +28,11 @@ Security to add:
 - Encrypt python modules
 - Fully encrypt python code
 
-2.1.1.b2 (08/11/17)
+2.2.0a0 ()
+- Added probability calculator with a few tests
+- Rearranged file structure
+
+2.1.1b2 (08/11/17)
 - Retrieve old highscores
 - Bug fixes
 

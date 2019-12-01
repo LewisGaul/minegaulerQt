@@ -3,56 +3,65 @@
 import random as rnd
 import logging
 
-from utils import prettify_grid, get_nbrs
+from .utils import prettify_grid, get_nbrs
 
 
-class Minefield(list):
-    def __init__(self, x_size, y_size):
+class Grid(list):
+    def __init__(self, x_size, y_size, init=0):
         super().__init__()
         for j in range(y_size):
-            row = x_size*[0]
+            row = x_size*[init]
             self.append(row)
         self.x_size, self.y_size = x_size, y_size
         self.all_coords = [(x, y) for x in range(x_size) for y in range(y_size)]
-        self.nr_mines = 0
+    def __str__(self):
+        return prettify_grid(self, {0: '-', 'U':'#'})
+    def fill(self, item):
+        """Fill the grid with item in every cell."""
+        for row in self:
+            for i in range(len(row)):
+                row[i] = item
+
+class Minefield(Grid):
+    def __init__(self, x_size, y_size):
+        super().__init__(x_size, y_size)
+        self.mines = 0
         self.mine_coords = []
-        self.completed_board = []
-        for j in range(y_size):
-            self.completed_board.append(x_size*[0])
+        self.completed_board = Grid(x_size, y_size)
     def __repr__(self):
-        mines = " with {} mines".format(self.nr_mines) if self.nr_mines else ""
+        mines = " with {} mines".format(self.mines) if self.mines else ""
         return "<{}x{} minefield{}>".format(self.x_size, self.y_size, mines)
     def __str__(self):
         return prettify_grid(self)
     def print_completed_board(self):
-        print(prettify_grid(self.completed_board, {0: '-'}) + '\n')
+        print(self.completed_board + '\n')
     def create_from_list(self, coords):
         assert self.mine_coords == [], "Minefield already created."
         self.mine_coords = coords
-        self.nr_mines = len(self.mine_coords)
+        self.mines = len(self.mine_coords)
         for (x, y) in coords:
             self[y][x] += 1
-    def create(self, nr_mines, per_cell=1, safe_coords=[]):
+    def create(self, mines, per_cell=1, safe_coords=[]):
         assert self.mine_coords == [], "Minefield already created."
-        self.nr_mines = nr_mines
+        self.mines = mines
         self.per_cell = per_cell
-        assert (nr_mines < (self.x_size*self.y_size - 1) * per_cell), (
+        assert (mines < (self.x_size*self.y_size - 1) * per_cell), (
             "Too many mines ({}) for grid with dimensions {} x {}.".format(
-                nr_mines, self.x_size, self.y_size))
+                mines, self.x_size, self.y_size))
         avble_coords = [c for c in self.all_coords if c not in safe_coords]
         # Can't give opening on first click if too many mines.
-        if nr_mines > len(avble_coords) * per_cell:
+        if mines > len(avble_coords) * per_cell:
             logging.warning(
                 "Unable to create minefield with requested safe_coords - "
                 "too many mines ({} mines, {} cells, {} safe_coords).".format(
-                    nr_mines, self.x_size*self.y_size, len(safe_coords)))
+                    mines, self.x_size*self.y_size, len(safe_coords)))
             avble_coords = self.all_coords[:]
         if per_cell == 1:
             rnd.shuffle(avble_coords)
-            self.create_from_list(avble_coords[:nr_mines])
+            self.create_from_list(avble_coords[:mines])
         else:
             n = 0
-            while n < nr_mines:
+            while n < mines:
                 pos = rnd.randint(0, self.x_size*self.y_size - 1)
                 x, y = pos % self.x_size, pos // self.x_size
                 if (x, y) not in safe_coords and self[y][x] < self.per_cell:
@@ -98,26 +107,6 @@ class Minefield(list):
         exposed = len({c for opening in self.openings for c in opening})
         clicks += self.x_size*self.y_size - len(set(self.mine_coords)) - exposed
         self.bbbv = clicks
-
-    def serialise(self, path):
-        assert mine_coords is not None, (
-            "Minefield not initialised - nothing to save.")
-        # No need to be secure.
-        obj = dict()
-        for attr in ['mine_coords', 'x_size', 'y_size', 'per_cell']:
-            obj[attr] = getattr(self, attr)
-        with open(path, 'w') as f:
-            json.dump(obj, f)
-    @classmethod
-    def deserialise(cls, path):
-        with open(path, 'r') as f:
-            obj = json.load(f)
-        mf = cls(obj['x_size'], obj['y_size'])
-        # json stores tuples as lists - convert back.
-        mine_coords = map(tuple, obj['mine_coords'])
-        mf.create_from_list(mine_coords)
-        mf.per_cell = obj['per_cell']
-        return mf
 
 
 

@@ -2,7 +2,7 @@
 Command-line user interface.
 """
 
-from utils import prettify_grid
+from minegauler.utils import prettify_grid
 
 
 class GameCLI:
@@ -83,7 +83,7 @@ class GameCLI:
     def finalise_win(self):
         print("\nYou won!")
         self.procr.game.print_board()
-    def highscore_added(self, h):
+    def handle_highscore(self, h):
         pass
 
 
