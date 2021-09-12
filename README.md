@@ -1,3 +1,5 @@
+**This repository has been archived in favour of https://github.com/LewisGaul/minegauler where development will continue.**
+
 # MineGauler
 
 ![img1](images/screenshots/beginner_start.png)
